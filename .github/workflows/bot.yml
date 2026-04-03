@@ -1,0 +1,85 @@
+name: Run Boop Bot
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # Runs every 5 minutes to check mentions
+  workflow_dispatch:          # Manual trigger from GitHub Actions UI
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: '3.11'
+
+      - name: Cache dependencies
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore calendar state
+        uses: actions/cache@v4.2.0
+        with:
+          path: calendar_state.json
+          key: calendar-state
+          restore-keys: calendar-state
+
+      - name: Restore last post time
+        uses: actions/cache@v4.2.0
+        with:
+          path: last_post_time.txt
+          key: last-post-time
+          restore-keys: last-post-time
+
+      - name: Restore last seen mention ID
+        uses: actions/cache@v4.2.0
+        with:
+          path: last_seen_id.txt
+          key: last-seen-id
+          restore-keys: last-seen-id
+
+      - name: Restore posted tweet IDs
+        uses: actions/cache@v4.2.0
+        with:
+          path: posted_tweet_ids.json
+          key: posted-ids
+          restore-keys: posted-ids
+
+      - name: Restore engagement log
+        uses: actions/cache@v4.2.0
+        with:
+          path: engagement_log.json
+          key: engagement-log
+          restore-keys: engagement-log
+
+      - name: Run bot (single-pass mode)
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+        run: python run_once.py
+
+      - name: Upload engagement log as artifact
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: engagement-log-${{ github.run_number }}
+          path: engagement_log.json
+          retention-days: 30
+          if-no-files-found: ignore

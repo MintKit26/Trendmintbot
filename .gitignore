@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+last_seen_id.txt
+last_post_time.txt
+posted_tweet_ids.json
+engagement_log.json
+calendar_state.json
+*.egg-info/
+.venv/

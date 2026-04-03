@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BOOP — Bot Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #c8f04a;
+      --accent2: #f04a7a;
+      --text: #e8e8e8;
+      --muted: #666;
+      --mono: 'Space Mono', monospace;
+      --serif: 'DM Serif Display', serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,240,74,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,240,74,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: 60px 1fr;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,10,0.9);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: var(--serif);
+      font-size: 22px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .logo span { color: var(--muted); font-size: 11px; font-family: var(--mono); vertical-align: middle; margin-left: 8px; }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    .dot.offline { background: var(--accent2); animation: none; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Sidebar */
+    nav {
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      background: var(--surface);
+    }
+
+    .nav-section {
+      padding: 0 16px;
+      margin-bottom: 24px;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      padding: 0 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 2px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.15s;
+      border: 1px solid transparent;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { color: var(--text); background: var(--surface2); }
+    .nav-item.active { color: var(--accent); border-color: var(--border); background: var(--surface2); }
+
+    .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+    /* Main */
+    main {
+      padding: 28px;
+      overflow-y: auto;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.2s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-title {
+      font-family: var(--serif);
+      font-size: 28px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .page-sub {
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 28px;
+    }
+
+    /* Cards */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 20px;
+    }
+
+    .card-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-family: var(--serif);
+      font-size: 32px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .card-value.accent { color: var(--accent); }
+    .card-value.danger { color: var(--accent2); }
+
+    .card-sub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .btn.primary:hover { background: #b8e030; border-color: #b8e030; }
+
+    .btn.danger { border-color: var(--accent2); color: var(--accent2); }
+    .btn.danger:hover { background: var(--accent2); color: #fff; }
+
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Controls section */
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    /* Textarea / Input */
+    textarea, input[type="text"], input[type="number"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 12px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    textarea:focus, input:focus { border-color: var(--accent); }
+
+    label {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    /* Log table */
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .log-table th {
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .log-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1a1a1a;
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    .log-table tr:hover td { background: var(--surface2); }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tag.reply { background: rgba(200,240,74,0.1); color: var(--accent); border: 1px solid rgba(200,240,74,0.2); }
+    .tag.post { background: rgba(100,140,255,0.1); color: #6496ff; border: 1px solid rgba(100,140,255,0.2); }
+    .tag.check { background: rgba(240,74,122,0.1); color: var(--accent2); border: 1px solid rgba(240,74,122,0.2); }
+
+    /* Rate limit bars */
+    .rate-bar-wrap { margin-bottom: 16px; }
+    .rate-bar-header { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--muted); font-size: 11px; }
+    .rate-bar-track { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+    .rate-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+    .rate-bar-fill.warn { background: #f0a04a; }
+    .rate-bar-fill.danger { background: var(--accent2); }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-info strong { display: block; font-size: 12px; margin-bottom: 2px; }
+    .toggle-info span { font-size: 11px; color: var(--muted); }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: var(--muted);
+      top: 3px;
+      left: 3px;
+      border-radius: 1px;
+      transition: all 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track { background: rgba(200,240,74,0.15); border-color: var(--accent); }
+    .toggle input:checked + .toggle-track::after { background: var(--accent); left: 21px; }
+
+    /* Divider */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 12px 20px;
+      font-size: 12px;
+      border-radius: 2px;
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 999;
+    }
+
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <header>
+    <div class="logo">boop <span>// bot control v1</span></div>
+    <div class="status-pill">
+      <div class="dot" id="status-dot"></div>
+      <span id="status-text">connecting...</span>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Monitor</div>
+      <div class="nav-item active" onclick="showPage('overview', this)">
+        <span class="nav-icon">◈</span> Overview
+      </div>
+      <div class="nav-item" onclick="showPage('logs', this)">
+        <span class="nav-icon">≡</span> Engagement Log
+      </div>
+      <div class="nav-item" onclick="showPage('limits', this)">
+        <span class="nav-icon">⬡</span> Rate Limits
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Control</div>
+      <div class="nav-item" onclick="showPage('post', this)">
+        <span class="nav-icon">↑</span> Manual Post
+      </div>
+      <div class="nav-item" onclick="showPage('settings', this)">
+        <span class="nav-icon">⚙</span> Settings
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="page-title">Overview</div>
+      <div class="page-sub">Live stats from engagement_log.json</div>
+
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-label">Total Posts</div>
+          <div class="card-value accent" id="stat-posts">—</div>
+          <div class="card-sub">scheduled + manual</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Mentions Replied</div>
+          <div class="card-value" id="stat-replies">—</div>
+          <div class="card-sub">since launch</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Total Likes</div>
+          <div class="card-value" id="stat-likes">—</div>
+          <div class="card-sub">across all posts</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Impressions</div>
+          <div class="card-value" id="stat-impressions">—</div>
+          <div class="card-sub">total reach</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-label">Recent Posts</div>
+          <div id="recent-posts" style="margin-top:8px; color: var(--muted); font-size:12px;">
+            Load engagement_log.json to see recent posts.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Top Performing</div>
+          <div id="top-posts" style="margin-top:8px; color: var(--muted); font-size:12px;">
+            Load engagement_log.json to see top posts.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Load Log File</div>
+        <p style="color:var(--muted); font-size:11px; margin-bottom:12px;">
+          Upload your local <code>engagement_log.json</code> to populate stats. This file is generated by the bot at runtime.
+        </p>
+        <input type="file" id="log-upload" accept=".json" onchange="loadLogFile(event)"
+          style="font-size:11px; color:var(--muted); background:var(--surface2); border:1px solid var(--border); padding:8px; border-radius:2px; width:100%; cursor:pointer;" />
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="page" id="page-logs">
+      <div class="page-title">Engagement Log</div>
+      <div class="page-sub">All events from the bot — replies, posts, and metric checks</div>
+
+      <div class="controls-row">
+        <button class="btn" onclick="filterLogs('all')">All</button>
+        <button class="btn" onclick="filterLogs('mention_reply')">Replies</button>
+        <button class="btn" onclick="filterLogs('scheduled_post')">Posts</button>
+        <button class="btn" onclick="filterLogs('engagement_check')">Checks</button>
+        <button class="btn" style="margin-left:auto" onclick="exportLog()">↓ Export CSV</button>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Detail</th>
+              <th>Metrics</th>
+            </tr>
+          </thead>
+          <tbody id="log-body">
+            <tr><td colspan="4" style="color:var(--muted); text-align:center; padding:32px;">
+              Upload engagement_log.json on the Overview tab to view logs.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RATE LIMITS -->
+    <div class="page" id="page-limits">
+      <div class="page-title">Rate Limits</div>
+      <div class="page-sub">X API free tier usage — resets on rolling windows</div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-label">Tweets / 24h</div>
+          <div class="rate-bar-wrap" style="margin-top:12px">
+            <div class="rate-bar-header">
+              <span id="tweet-used">0 used</span>
+              <span>100 max</span>
+            </div>
+            <div class="rate-bar-track">
+              <div class="rate-bar-fill" id="tweet-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div style="color:var(--muted); font-size:11px; margin-top:8px;">Includes scheduled posts + replies</div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Read Requests / 15min</div>
+          <div class="rate-bar-wrap" style="margin-top:12px">
+            <div class="rate-bar-header">
+              <span id="read-used">0 used</span>
+              <span>15 max</span>
+            </div>
+            <div class="rate-bar-track">
+              <div class="rate-bar-fill" id="read-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div style="color:var(--muted); font-size:11px; margin-top:8px;">Engagement metric checks</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Estimate from Log</div>
+        <p style="color:var(--muted); font-size:11px; margin-bottom:16px;">
+          Calculated from uploaded engagement_log.json. For live limits, check the X Developer Portal.
+        </p>
+        <div id="limit-estimate" style="color:var(--muted); font-size:12px;">
+          Upload a log file on the Overview tab to estimate usage.
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-label">X API Tier</div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <strong>Free Tier</strong>
+            <span>17 tweets/day · 10 reads/15min</span>
+          </div>
+          <span style="color:var(--muted); font-size:11px;">Inactive</span>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <strong>Basic Tier ($100/mo)</strong>
+            <span>100 tweets/day · 15 reads/15min · 3,000/month</span>
+          </div>
+          <span style="color:var(--accent); font-size:11px;">Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANUAL POST -->
+    <div class="page" id="page-post">
+      <div class="page-title">Manual Post</div>
+      <div class="page-sub">Compose and queue a tweet outside the scheduled cycle</div>
+
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <div class="card-label">Compose</div>
+            <div class="field" style="margin-top:12px">
+              <label>Tweet Text</label>
+              <textarea id="compose-text" rows="5" maxlength="280"
+                placeholder="write something dry and deadpan here..."
+                oninput="updateCharCount()"></textarea>
+              <div style="text-align:right; color:var(--muted); font-size:11px; margin-top:4px;">
+                <span id="char-count">0</span>/280
+              </div>
+            </div>
+
+            <div class="controls-row">
+              <button class="btn primary" onclick="queuePost()">↑ Queue Post</button>
+              <button class="btn" onclick="generatePreview()">✦ AI Generate</button>
+              <button class="btn danger" onclick="clearCompose()">✕ Clear</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-label">Queued Posts</div>
+            <div id="queue-list" style="margin-top:12px; color:var(--muted); font-size:12px;">
+              No posts queued.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Preview</div>
+          <div id="preview-box" style="
+            margin-top: 12px;
+            padding: 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            min-height: 120px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+          ">Your post preview will appear here.</div>
+
+          <hr class="divider" />
+          <div class="card-label">Post History</div>
+          <div id="post-history" style="margin-top:8px; color:var(--muted); font-size:11px;">
+            No posts yet this session.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-title">Settings</div>
+      <div class="page-sub">Configure bot behavior — edit .env to apply changes</div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-label">Scheduling</div>
+          <div class="field" style="margin-top:12px">
+            <label>Post Interval (hours)</label>
+            <input type="number" id="setting-interval" value="6" min="1" max="24" />
+          </div>
+          <div class="field">
+            <label>Mention Poll Interval (seconds)</label>
+            <input type="number" id="setting-poll" value="60" min="30" max="300" />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Bot Behavior</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Auto-reply to mentions</strong>
+              <span>Reply when tagged on X</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-replies" checked />
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Scheduled posting</strong>
+              <span>Post on set interval</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-posting" checked />
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Engagement checks</strong>
+              <span>Fetch metrics every 2h</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-checks" checked />
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>AI generation</strong>
+              <span>Use Claude for posts + replies</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-ai" checked />
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Personality Prompt Preview</div>
+        <div class="field" style="margin-top:12px">
+          <label>System Prompt (edit in bot/templates.py)</label>
+          <textarea rows="8" readonly style="opacity:0.6; cursor:not-allowed;">You are a dry, deadpan commentary account on X (Twitter).
+Your voice is calm, slightly detached, and mildly unimpressed — but never mean.
+You observe meme culture and internet trends with the energy of someone who has seen
+every trend come and go and finds it all mildly amusing.
+
+Rules:
+- Keep posts under 250 characters
+- No hashtags unless they're ironic
+- No exclamation points
+- Occasionally add a quiet observation that sounds like it came from a tired anthropologist
+- You are a culture observer, not a promotional account</textarea>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-label">Export Config</div>
+        <p style="color:var(--muted); font-size:11px; margin-bottom:12px;">
+          Generate an updated .env snippet based on current settings above.
+        </p>
+        <button class="btn primary" onclick="exportConfig()">↓ Copy .env snippet</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ── State ──────────────────────────────────────────────
+  let allLogs = [];
+  let postQueue = [];
+  let postHistory = [];
+
+  // ── Navigation ─────────────────────────────────────────
+  function showPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    el.classList.add('active');
+  }
+
+  // ── Status indicator ───────────────────────────────────
+  function setStatus(online) {
+    const dot = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    if (online) {
+      dot.classList.remove('offline');
+      text.textContent = 'log loaded';
+    } else {
+      dot.classList.add('offline');
+      text.textContent = 'no log loaded';
+    }
+  }
+
+  setStatus(false);
+
+  // ── Log file loader ────────────────────────────────────
+  function loadLogFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        allLogs = JSON.parse(e.target.result);
+        setStatus(true);
+        populateStats();
+        renderLogs('all');
+        estimateLimits();
+        toast('Log file loaded — ' + allLogs.length + ' events');
+      } catch {
+        toast('Error parsing JSON file');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ── Stats ──────────────────────────────────────────────
+  function populateStats() {
+    const posts = allLogs.filter(e => e.type === 'scheduled_post').length;
+    const replies = allLogs.filter(e => e.type === 'mention_reply').length;
+    const checks = allLogs.filter(e => e.type === 'engagement_check');
+    const likes = checks.reduce((s, e) => s + (e.likes || 0), 0);
+    const impressions = checks.reduce((s, e) => s + (e.impressions || 0), 0);
+
+    document.getElementById('stat-posts').textContent = posts;
+    document.getElementById('stat-replies').textContent = replies;
+    document.getElementById('stat-likes').textContent = likes.toLocaleString();
+    document.getElementById('stat-impressions').textContent = impressions.toLocaleString();
+
+    // Recent posts
+    const recentPosts = allLogs
+      .filter(e => e.type === 'scheduled_post')
+      .slice(-5).reverse();
+
+    const recentEl = document.getElementById('recent-posts');
+    if (recentPosts.length) {
+      recentEl.innerHTML = recentPosts.map(p => `
+        <div style="padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; color:var(--text)">
+          <div style="color:var(--muted); font-size:10px; margin-bottom:3px">${fmtTime(p.timestamp)}</div>
+          ${p.text || '—'}
+        </div>
+      `).join('');
+    }
+
+    // Top by likes
+    const byLikes = allLogs
+      .filter(e => e.type === 'engagement_check' && e.likes > 0)
+      .sort((a, b) => b.likes - a.likes)
+      .slice(0, 3);
+
+    const topEl = document.getElementById('top-posts');
+    if (byLikes.length) {
+      topEl.innerHTML = byLikes.map(p => `
+        <div style="padding:8px 0; border-bottom:1px solid var(--border); font-size:12px">
+          <div style="color:var(--muted); font-size:10px; margin-bottom:3px">tweet ${p.tweet_id}</div>
+          <span style="color:var(--accent)">♥ ${p.likes}</span>
+          <span style="color:var(--muted); margin:0 8px">·</span>
+          <span>↺ ${p.retweets}</span>
+          <span style="color:var(--muted); margin:0 8px">·</span>
+          <span>${p.impressions?.toLocaleString() || 0} impressions</span>
+        </div>
+      `).join('');
+    } else {
+      topEl.textContent = 'No engagement data yet.';
+    }
+  }
+
+  // ── Logs ───────────────────────────────────────────────
+  function renderLogs(filter) {
+    const data = filter === 'all' ? allLogs : allLogs.filter(e => e.type === filter);
+    const tbody = document.getElementById('log-body');
+
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted); text-align:center; padding:32px;">No events found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = [...data].reverse().map(e => {
+      const typeTag = {
+        mention_reply: '<span class="tag reply">reply</span>',
+        scheduled_post: '<span class="tag post">post</span>',
+        engagement_check: '<span class="tag check">check</span>',
+      }[e.type] || e.type;
+
+      let detail = '';
+      if (e.type === 'mention_reply') detail = `@${e.username}: ${truncate(e.reply, 60)}`;
+      if (e.type === 'scheduled_post') detail = truncate(e.text, 80);
+      if (e.type === 'engagement_check') detail = `tweet ${e.tweet_id}`;
+
+      let metrics = '';
+      if (e.type === 'engagement_check') {
+        metrics = `♥ ${e.likes}  ↺ ${e.retweets}  ↩ ${e.replies}  👁 ${e.impressions?.toLocaleString() || 0}`;
+      }
+
+      return `
+        <tr>
+          <td style="color:var(--muted); white-space:nowrap">${fmtTime(e.timestamp)}</td>
+          <td>${typeTag}</td>
+          <td>${detail}</td>
+          <td style="color:var(--muted)">${metrics}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterLogs(type) {
+    renderLogs(type);
+  }
+
+  function exportLog() {
+    if (!allLogs.length) { toast('No log data to export'); return; }
+    const rows = [['timestamp','type','username','tweet_id','reply','text','likes','retweets','replies','impressions']];
+    allLogs.forEach(e => {
+      rows.push([
+        e.timestamp, e.type, e.username||'', e.tweet_id||'',
+        e.reply||'', e.text||'', e.likes||'', e.retweets||'',
+        e.replies||'', e.impressions||''
+      ]);
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    download('engagement_export.csv', csv);
+    toast('CSV exported');
+  }
+
+  // ── Rate limits estimate ───────────────────────────────
+  function estimateLimits() {
+    const now = Date.now();
+    const day = 86400000;
+    const fifteenMin = 900000;
+
+    const recentTweets = allLogs.filter(e =>
+      (e.type === 'scheduled_post' || e.type === 'mention_reply') &&
+      now - new Date(e.timestamp).getTime() < day
+    ).length;
+
+    const recentReads = allLogs.filter(e =>
+      e.type === 'engagement_check' &&
+      now - new Date(e.timestamp).getTime() < fifteenMin
+    ).length;
+
+    const tweetPct = Math.min(100, (recentTweets / 100) * 100);
+    const readPct = Math.min(100, (recentReads / 15) * 100);
+
+    document.getElementById('tweet-used').textContent = recentTweets + ' used';
+    document.getElementById('read-used').textContent = recentReads + ' used';
+
+    const tweetBar = document.getElementById('tweet-bar');
+    tweetBar.style.width = tweetPct + '%';
+    tweetBar.className = 'rate-bar-fill' + (tweetPct > 85 ? ' danger' : tweetPct > 60 ? ' warn' : '');
+
+    const readBar = document.getElementById('read-bar');
+    readBar.style.width = readPct + '%';
+    readBar.className = 'rate-bar-fill' + (readPct > 85 ? ' danger' : readPct > 60 ? ' warn' : '');
+
+    document.getElementById('limit-estimate').innerHTML = `
+      <span style="color:var(--text)">${recentTweets}/100</span> tweets in the last 24h &nbsp;·&nbsp;
+      <span style="color:var(--text)">${recentReads}/15</span> reads in the last 15min
+    `;
+  }
+
+  // ── Manual post ────────────────────────────────────────
+  function updateCharCount() {
+    const len = document.getElementById('compose-text').value.length;
+    document.getElementById('char-count').textContent = len;
+    document.getElementById('preview-box').textContent =
+      document.getElementById('compose-text').value || 'Your post preview will appear here.';
+  }
+
+  function generatePreview() {
+    const samples = [
+      "something happened on the internet today. opinions were had.",
+      "the meme has mutated again. this is normal. this is fine.",
+      "a discourse has started. it will resolve nothing. we will move on.",
+      "someone posted something. others reacted. the cycle is complete.",
+      "another cultural moment has occurred. it will be a template by thursday.",
+    ];
+    const text = samples[Math.floor(Math.random() * samples.length)];
+    document.getElementById('compose-text').value = text;
+    updateCharCount();
+    toast('AI preview generated (connect bot API for live generation)');
+  }
+
+  function queuePost() {
+    const text = document.getElementById('compose-text').value.trim();
+    if (!text) { toast('Write something first'); return; }
+    postQueue.push({ text, time: new Date().toISOString() });
+    renderQueue();
+    toast('Post queued — run bot to send');
+  }
+
+  function renderQueue() {
+    const el = document.getElementById('queue-list');
+    if (!postQueue.length) {
+      el.textContent = 'No posts queued.';
+      return;
+    }
+    el.innerHTML = postQueue.map((p, i) => `
+      <div style="padding:8px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:flex-start">
+        <div style="flex:1; font-size:12px; color:var(--text)">${truncate(p.text, 80)}</div>
+        <button class="btn" style="padding:4px 10px; font-size:10px" onclick="removeQueue(${i})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function removeQueue(i) {
+    postQueue.splice(i, 1);
+    renderQueue();
+  }
+
+  function clearCompose() {
+    document.getElementById('compose-text').value = '';
+    updateCharCount();
+  }
+
+  // ── Settings export ────────────────────────────────────
+  function exportConfig() {
+    const interval = document.getElementById('setting-interval').value;
+    const poll = document.getElementById('setting-poll').value;
+    const snippet = `POST_INTERVAL_HOURS=${interval}\nMENTION_POLL_INTERVAL=${poll}`;
+    navigator.clipboard.writeText(snippet).then(() => toast('Copied to clipboard'));
+  }
+
+  // ── Helpers ────────────────────────────────────────────
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function truncate(str, n) {
+    if (!str) return '';
+    return str.length > n ? str.slice(0, n) + '…' : str;
+  }
+
+  function download(filename, text) {
+    const a = document.createElement('a');
+    a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+    a.download = filename;
+    a.click();
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

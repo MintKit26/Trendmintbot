@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>$JULES — as foretold.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f2ede0;
+      --ink: #100f0c;
+      --muted: #7a7060;
+      --accent: #b83a18;
+      --accent2: #1a3eb0;
+      --surface: #e8e2d0;
+      --border: #c8bfa8;
+      --bebas: 'Bebas Neue', sans-serif;
+      --mono: 'DM Mono', monospace;
+      --serif: 'Playfair Display', serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 13px;
+      overflow-x: hidden;
+    }
+
+    /* Paper grain */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4t5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c4zWFmAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAFVklEQVR4XpWWB67c2BUFb3g557T/hRo9/WUMZHlgr4Bg8Z4qQgQJlHI4A8SzFVrapvmTF9O7dmYRFZ60YiBhJRCgh1FYhiLAmdvX0CzTOpNE77ME0Zty/nWWzchDtiqrmQDeuv3powQ5ta2eN0FY0InkqDD73lT9c9lEzwUNqgFHs9VQce3TVClFCQrSTfOiYkVJQBmpbq2L6iZavPnAPcoU0dSw0SUTqz/GtrGuXfbyyBniKykOWQWGqwwma4dXgYHwJiCOUqMZyT/A4wGjWEIcNpg/FhOC5NqRZY1m3vNBfuGcEjDaAPjnYtq4I6eJLEtbMWkqhMkHXAUB0EAFY7c8KDq1yVwsDuBPkq7WRXDj8/Jxi13BjOJBEWYFSqHMg0bYI6HkCgYBk4IAtpgpECi4yRsAlq0V+T4lYGkFDRuAPSyGKk7TS5yGHRGQaZmLk6J7MaWI+CiNqe4gSh90pLWDAp19b1HJb4tI=");
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* ── MASTHEAD ── */
+    .masthead {
+      border-bottom: 3px double var(--ink);
+      padding: 20px 40px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    .masthead-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .masthead h1 {
+      font-family: var(--bebas);
+      font-size: clamp(80px, 14vw, 160px);
+      line-height: 0.9;
+      letter-spacing: 2px;
+      color: var(--ink);
+    }
+
+    .masthead h1 span { color: var(--accent); }
+
+    .masthead-sub {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 16px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .ticker-bar {
+      background: var(--ink);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .ticker-inner {
+      display: inline-block;
+      animation: ticker 20s linear infinite;
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+
+    .section-rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    .section-rule.heavy {
+      border-top: 2px solid var(--ink);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr 1px 1fr;
+      gap: 0;
+      padding: 40px 0;
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .hero-col {
+      padding: 0 32px;
+    }
+
+    .hero-col:first-child { padding-left: 0; }
+    .hero-col:last-child { padding-right: 0; }
+
+    .col-divider {
+      background: var(--border);
+      width: 1px;
+    }
+
+    .kicker {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      font-family: var(--mono);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .hero-headline {
+      font-family: var(--serif);
+      font-size: clamp(24px, 3vw, 38px);
+      line-height: 1.15;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .hero-body {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .hero-body p + p { margin-top: 12px; }
+
+    .pull-quote {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      line-height: 1.5;
+      color: var(--ink);
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      margin: 20px 0;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    .stat-cell {
+      padding: 24px;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stat-cell:last-child { border-right: none; }
+
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: var(--bebas);
+      font-size: 42px;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .stat-value.red { color: var(--accent); }
+
+    .stat-sub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── JULES SECTION ── */
+    .jules-section {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 48px;
+      padding: 40px 0;
+      border-bottom: 2px solid var(--ink);
+      align-items: start;
+    }
+
+    .section-head {
+      font-family: var(--bebas);
+      font-size: 48px;
+      letter-spacing: 1px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .body-text {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.9;
+      color: var(--muted);
+    }
+
+    .body-text p + p { margin-top: 12px; }
+
+    /* Tweet card */
+    .tweet-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .tweet-card::before {
+      content: '@trendmintbot';
+      display: block;
+      font-size: 10px;
+      color: var(--accent2);
+      margin-bottom: 8px;
+      font-family: var(--mono);
+    }
+
+    .tweet-text {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--ink);
+      font-style: italic;
+    }
+
+    .tweet-date {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* ── TOKENOMICS ── */
+    .tokenomics {
+      padding: 40px 0;
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .toko-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 24px;
+    }
+
+    .toko-cell {
+      background: var(--bg);
+      padding: 24px;
+    }
+
+    .toko-name {
+      font-family: var(--bebas);
+      font-size: 28px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .toko-pct {
+      font-family: var(--bebas);
+      font-size: 48px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .toko-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    /* ── ROADMAP ── */
+    .roadmap {
+      padding: 40px 0;
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .roadmap-items {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .roadmap-item {
+      padding: 24px;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
+    .roadmap-item:last-child { border-right: none; }
+
+    .phase {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .phase-title {
+      font-family: var(--bebas);
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+
+    .phase-items {
+      list-style: none;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 2;
+    }
+
+    .phase-items li::before { content: '— '; color: var(--accent); }
+
+    .phase-done { background: rgba(184, 58, 24, 0.04); }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 60px 0;
+      text-align: center;
+    }
+
+    .cta-headline {
+      font-family: var(--bebas);
+      font-size: clamp(48px, 8vw, 100px);
+      line-height: 0.95;
+      margin-bottom: 16px;
+    }
+
+    .cta-headline span { color: var(--accent); }
+
+    .cta-sub {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 32px;
+      font-family: var(--mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover { background: var(--accent); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+    }
+
+    .btn-outline:hover { background: var(--ink); color: var(--bg); }
+
+    /* Wallet modal */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(16,15,12,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-bg.open { display: flex; }
+
+    .modal {
+      background: var(--bg);
+      border: 2px solid var(--ink);
+      padding: 40px;
+      max-width: 420px;
+      width: 90%;
+      position: relative;
+    }
+
+    .modal-title {
+      font-family: var(--bebas);
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .wallet-option {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--surface);
+    }
+
+    .wallet-option:hover { border-color: var(--ink); background: var(--bg); }
+
+    .wallet-icon { font-size: 20px; }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--muted);
+      background: none;
+      border: none;
+      font-family: var(--mono);
+    }
+
+    .modal-close:hover { color: var(--ink); }
+
+    .modal-note {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 16px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 3px double var(--ink);
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .footer-logo {
+      font-family: var(--bebas);
+      font-size: 24px;
+      color: var(--ink);
+    }
+
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: var(--muted); text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+    .footer-links a:hover { color: var(--ink); }
+
+    /* Animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in:nth-child(1) { animation-delay: 0.1s; }
+    .fade-in:nth-child(2) { animation-delay: 0.2s; }
+    .fade-in:nth-child(3) { animation-delay: 0.3s; }
+    .fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; }
+      .col-divider { display: none; }
+      .hero-col { padding: 0 0 24px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stat-cell:nth-child(2) { border-right: none; }
+      .jules-section { grid-template-columns: 1fr; }
+      .toko-grid { grid-template-columns: 1fr; }
+      .roadmap-items { grid-template-columns: 1fr 1fr; }
+      .container { padding: 0 20px; }
+      .masthead { padding: 16px 20px; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-top">
+    <span>Vol. 1, No. 1</span>
+    <span>The Internet Has Been Warned</span>
+    <span>Price: Free. Value: TBD.</span>
+  </div>
+  <h1>$<span>JULES</span></h1>
+  <div class="masthead-sub">the coin that saw it coming. as foretold.</div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <span class="ticker-inner">
+    &nbsp;&nbsp;&nbsp;$JULES — the cycle is complete &nbsp;·&nbsp; jules has logged on &nbsp;·&nbsp; as foretold &nbsp;·&nbsp; mildly bullish &nbsp;·&nbsp; another era begins &nbsp;·&nbsp; the scholars will debate what it means &nbsp;·&nbsp; $JULES — the cycle is complete &nbsp;·&nbsp; jules has logged on &nbsp;·&nbsp; as foretold &nbsp;·&nbsp; mildly bullish &nbsp;·&nbsp; another era begins &nbsp;·&nbsp; the scholars will debate what it means &nbsp;·&nbsp;
+  </span>
+</div>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-col fade-in">
+      <span class="kicker">Breaking</span>
+      <div class="hero-headline">A coin has emerged. Jules saw it coming.</div>
+      <div class="hero-body">
+        <p>The internet has cycles. Trends rise, peak, become memes, become templates, become forgotten. Jules O'Malley has been watching. Taking notes. Mildly unimpressed.</p>
+        <p>$JULES is the first coin born from pure cultural observation. No promises. No roadmap built on hype. Just vibes, dry wit, and the inexorable march of the meme cycle.</p>
+      </div>
+      <div class="pull-quote">"something is launching. we have seen this before. — jules"</div>
+    </div>
+
+    <div class="col-divider"></div>
+
+    <div class="hero-col fade-in">
+      <span class="kicker">Who is Jules</span>
+      <div class="hero-headline">The Observer. The Account. The Coin.</div>
+      <div class="hero-body">
+        <p>Jules O'Malley (@trendmintbot) is a culture observer who has logged more meme cycles than most people have had hot meals. Calm. Deadpan. Present.</p>
+        <p>$JULES is Jules made liquid. A community of people who have also seen this before, who know the cycle, and who are here anyway — as foretold.</p>
+        <p>The coin doesn't promise the moon. It promises awareness. And maybe a quiet chuckle.</p>
+      </div>
+    </div>
+
+    <div class="col-divider"></div>
+
+    <div class="hero-col fade-in">
+      <span class="kicker">Join the Cycle</span>
+      <div class="hero-headline">The community has been assembled.</div>
+      <div class="hero-body">
+        <p>Follow @trendmintbot on X for dry cultural commentary, early access updates, and the occasional observation that feels eerily accurate.</p>
+        <p>Connect your wallet below to be notified at launch. No spam. Jules doesn't do spam. Jules merely observes.</p>
+      </div>
+      <br />
+      <button class="btn btn-primary" onclick="openModal()">Connect Wallet</button>
+    </div>
+  </div>
+
+  <!-- CONTRACT ADDRESS -->
+  <div style="background:var(--surface); border:1px solid var(--border); padding:20px 28px; margin: 0 0 0 0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <div>
+      <div style="font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:4px;">Contract Address (Solana)</div>
+      <div style="font-family:var(--mono); font-size:12px; color:var(--ink);" id="ca-text">G7jVREYEqRkGLi38wMizP3YrDcSMyUe767gZzYfXpump</div>
+    </div>
+    <button class="btn btn-outline" onclick="copyCA()" style="padding:8px 20px; font-size:11px;">Copy CA</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-cell fade-in">
+      <div class="stat-label">Total Supply</div>
+      <div class="stat-value">1B</div>
+      <div class="stat-sub">$JULES tokens. as foretold.</div>
+    </div>
+    <div class="stat-cell fade-in">
+      <div class="stat-label">Launch Status</div>
+      <div class="stat-value red">Soon</div>
+      <div class="stat-sub">jules is watching the charts</div>
+    </div>
+    <div class="stat-cell fade-in">
+      <div class="stat-label">Meme Cycles Observed</div>
+      <div class="stat-value">∞</div>
+      <div class="stat-sub">by jules personally</div>
+    </div>
+    <div class="stat-cell fade-in">
+      <div class="stat-label">Surprise Level</div>
+      <div class="stat-value">Low</div>
+      <div class="stat-sub">jules saw this coming</div>
+    </div>
+  </div>
+
+  <!-- JULES SECTION -->
+  <div class="jules-section">
+    <div>
+      <span class="kicker">The Voice Behind The Coin</span>
+      <div class="section-head">Jules Has Been Here Before.</div>
+      <br />
+      <div class="body-text">
+        <p>Every coin has a mascot. $JULES has an observer. Jules O'Malley doesn't hype. Jules doesn't shill. Jules simply notes that another cycle has begun, that the community has gathered, that the charts look like they always look at this stage — and that this too shall become a template.</p>
+        <p>There's something oddly comforting about that. In a space full of promises, $JULES promises only one thing: Jules will still be here, posting, when the dust settles. Mildly unsurprised. As foretold.</p>
+        <p>Follow @trendmintbot on X to watch Jules observe the launch in real time — with the quiet dignity of someone who has been through this before and found it, at minimum, worth documenting.</p>
+      </div>
+    </div>
+
+    <div>
+      <span class="kicker" style="display:block; margin-bottom:12px;">From the Feed of Jules</span>
+      <div class="tweet-card">
+        <div class="tweet-text">"something is launching. the cycle begins again. jules is watching. as foretold."</div>
+        <div class="tweet-date">Pre-launch · @trendmintbot</div>
+      </div>
+      <div class="tweet-card">
+        <div class="tweet-text">"the community has assembled. they have seen this before. they are here anyway. jules respects this."</div>
+        <div class="tweet-date">Pre-launch · @trendmintbot</div>
+      </div>
+      <div class="tweet-card">
+        <div class="tweet-text">"a coin named after jules. jules did not ask for this. jules is, however, mildly flattered. — jules"</div>
+        <div class="tweet-date">Pre-launch · @trendmintbot</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOKENOMICS -->
+  <div class="tokenomics">
+    <span class="kicker">Tokenomics</span>
+    <div class="section-head">Where The Tokens Go.</div>
+    <div class="toko-grid">
+      <div class="toko-cell">
+        <div class="toko-name">Community</div>
+        <div class="toko-pct">50%</div>
+        <div class="toko-desc">For the people who saw this coming. Fair launch allocation. No presale. Jules doesn't do presales.</div>
+      </div>
+      <div class="toko-cell">
+        <div class="toko-name">Liquidity</div>
+        <div class="toko-pct">30%</div>
+        <div class="toko-desc">Locked liquidity pool. The cycle needs fuel. Jules has ensured this. As foretold.</div>
+      </div>
+      <div class="toko-cell">
+        <div class="toko-name">Treasury</div>
+        <div class="toko-pct">10%</div>
+        <div class="toko-desc">For development, CEX listings, and whatever the next phase of the cycle demands.</div>
+      </div>
+      <div class="toko-cell">
+        <div class="toko-name">Marketing</div>
+        <div class="toko-pct">7%</div>
+        <div class="toko-desc">Jules observes. The marketing team acts on those observations. Responsibly.</div>
+      </div>
+      <div class="toko-cell">
+        <div class="toko-name">Team</div>
+        <div class="toko-pct">3%</div>
+        <div class="toko-desc">Vested over 12 months. The builders are in it for the long cycle. As expected.</div>
+      </div>
+      <div class="toko-cell" style="background: rgba(184,58,24,0.04)">
+        <div class="toko-name">Tax</div>
+        <div class="toko-pct">0%</div>
+        <div class="toko-desc">Zero buy/sell tax. Jules finds taxes mildly tedious. The community agreed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="roadmap">
+    <span class="kicker">The Cycle Map</span>
+    <div class="section-head">As Foretold, Phase By Phase.</div>
+    <div class="roadmap-items">
+      <div class="roadmap-item phase-done">
+        <div class="phase">Phase I — Complete</div>
+        <div class="phase-title">Jules Arrives</div>
+        <ul class="phase-items">
+          <li>@trendmintbot goes live</li>
+          <li>Community seeded on X</li>
+          <li>Jules begins observing</li>
+          <li>Website launches</li>
+        </ul>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Phase II — Now</div>
+        <div class="phase-title">The Launch</div>
+        <ul class="phase-items">
+          <li>Fair launch on DEX</li>
+          <li>Liquidity locked</li>
+          <li>Contract verified</li>
+          <li>Jules notes the irony</li>
+        </ul>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Phase III — Soon</div>
+        <div class="phase-title">The Cycle Grows</div>
+        <ul class="phase-items">
+          <li>CEX listings pursued</li>
+          <li>Community governance</li>
+          <li>Jules merch (mildly)</li>
+          <li>Partnerships observed</li>
+        </ul>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Phase IV — As Foretold</div>
+        <div class="phase-title">The Completion</div>
+        <ul class="phase-items">
+          <li>Top 100 CMC listing</li>
+          <li>Jules remains unbothered</li>
+          <li>The scholars debate</li>
+          <li>The cycle completes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-headline">The Cycle<br /><span>Begins.</span></div>
+    <div class="cta-sub">jules has been informed. jules is mildly ready.</div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="openModal()">Connect Wallet</button>
+      <a href="https://twitter.com/trendmintbot" target="_blank" class="btn btn-outline">Follow @trendmintbot</a>
+      <a href="https://solscan.io/token/G7jVREYEqRkGLi38wMizP3YrDcSMyUe767gZzYfXpump" target="_blank" class="btn btn-outline">View Contract</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">$JULES</div>
+  <div style="font-size:10px; color:var(--muted); text-align:center; max-width:400px; line-height:1.6;">
+    $JULES is a meme coin for entertainment purposes. Not financial advice. Jules is not a financial advisor. Jules is an observer. Do your own research. As foretold.
+  </div>
+  <div class="footer-links">
+    <a href="https://twitter.com/trendmintbot">X / Twitter</a>
+    <a href="#">Whitepaper</a>
+    <a href="#">Contract</a>
+  </div>
+</footer>
+
+<!-- WALLET MODAL -->
+<div class="modal-bg" id="modal" onclick="closeModalBg(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Connect Wallet</div>
+    <div class="modal-sub">Connect to be notified at launch and participate in the $JULES community. Jules recommends doing your own research first.</div>
+
+    <div class="wallet-option" onclick="connectWallet('MetaMask')">
+      <span class="wallet-icon">🦊</span>
+      <span>MetaMask</span>
+    </div>
+    <div class="wallet-option" onclick="connectWallet('Phantom')">
+      <span class="wallet-icon">👻</span>
+      <span>Phantom</span>
+    </div>
+    <div class="wallet-option" onclick="connectWallet('WalletConnect')">
+      <span class="wallet-icon">🔗</span>
+      <span>WalletConnect</span>
+    </div>
+    <div class="wallet-option" onclick="connectWallet('Coinbase Wallet')">
+      <span class="wallet-icon">🔵</span>
+      <span>Coinbase Wallet</span>
+    </div>
+
+    <div class="modal-note">
+      By connecting you agree that $JULES is a meme coin, not an investment vehicle. Jules is watching either way.
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyCA() {
+    navigator.clipboard.writeText('G7jVREYEqRkGLi38wMizP3YrDcSMyUe767gZzYfXpump')
+      .then(() => alert('CA copied. jules approves. — jules'));
+  }
+
+  function openModal() {
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+
+  function closeModalBg(e) {
+    if (e.target === document.getElementById('modal')) closeModal();
+  }
+
+  function connectWallet(name) {
+    // Replace with actual wallet connection logic (ethers.js / web3modal)
+    alert(`${name} connection coming at launch. Jules is aware. — jules`);
+    closeModal();
+  }
+</script>
+</body>
+</html>
