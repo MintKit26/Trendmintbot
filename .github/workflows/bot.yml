@@ -1,3 +1,6 @@
+- name: Verify grok.py
+        run: grep "MEME_PROBABILITY" bot/grok.py
+        
 name: Run Boop Bot
 
 on:
