@@ -34,13 +34,19 @@ def post_scheduled_content(client: tweepy.Client, api_v1=None):
     # Randomly decide whether to attach a meme image
     media_ids = None
     if api_v1 and should_generate_meme():
-        logger.info("Generating meme image for this post...")
+        logger.info("Meme probability triggered — attempting image generation...")
         image_bytes = generate_meme_image(text)
         if image_bytes:
             media_id = _upload_media(api_v1, image_bytes)
             if media_id:
                 media_ids = [media_id]
                 logger.info(f"Meme image attached (media_id: {media_id})")
+            else:
+                logger.warning("Media upload failed — posting text only")
+        else:
+            logger.warning("Image generation returned None — posting text only")
+    elif not api_v1:
+        logger.warning("api_v1 not available — skipping image generation")
 
     tweet_limiter.wait_if_needed()
     try:
