@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 GROK_API_URL = "https://api.x.ai/v1"
 GROK_TEXT_MODEL = "grok-3"
-GROK_IMAGE_MODEL = "grok-2-image"
+GROK_IMAGE_MODEL = "grok-imagine-image"
 
 # Set to 1.0 for testing, change back to 0.33 for production
 MEME_PROBABILITY = 1.0
@@ -66,7 +66,7 @@ def _call_grok_text(messages: list, system: str = "") -> str | None:
 
 
 def _call_grok_image(prompt: str) -> bytes | None:
-    """Generate an image using xAI Aurora and return raw bytes."""
+    """Generate an image using xAI and return raw bytes."""
     api_key = _get_api_key()
     if not api_key:
         return None
@@ -75,7 +75,6 @@ def _call_grok_image(prompt: str) -> bytes | None:
         "model": GROK_IMAGE_MODEL,
         "prompt": prompt,
         "n": 1,
-        "response_format": "b64_json",
     }
 
     req = urllib.request.Request(
@@ -91,9 +90,22 @@ def _call_grok_image(prompt: str) -> bytes | None:
     try:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read())
-            import base64
-            b64 = data["data"][0]["b64_json"]
-            return base64.b64decode(b64)
+
+            # Try URL response first (standard xAI format)
+            image_url = data.get("data", [{}])[0].get("url")
+            if image_url:
+                with urllib.request.urlopen(image_url) as img_resp:
+                    return img_resp.read()
+
+            # Fall back to b64_json if URL not present
+            b64 = data.get("data", [{}])[0].get("b64_json")
+            if b64:
+                import base64
+                return base64.b64decode(b64)
+
+            logger.error(f"Unexpected image response format: {data}")
+            return None
+
     except urllib.error.HTTPError as e:
         logger.error(f"Grok image API error {e.code}: {e.read().decode()}")
     except Exception as e:
