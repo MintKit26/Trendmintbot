@@ -75,6 +75,7 @@ def _call_grok_image(prompt: str) -> bytes | None:
         "model": GROK_IMAGE_MODEL,
         "prompt": prompt,
         "n": 1,
+        "response_format": "b64_json",
     }
 
     req = urllib.request.Request(
@@ -91,17 +92,19 @@ def _call_grok_image(prompt: str) -> bytes | None:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read())
 
-            # Try URL response first (standard xAI format)
-            image_url = data.get("data", [{}])[0].get("url")
-            if image_url:
-                with urllib.request.urlopen(image_url) as img_resp:
-                    return img_resp.read()
-
-            # Fall back to b64_json if URL not present
+            # Use b64_json to avoid Cloudflare blocks on image URLs
             b64 = data.get("data", [{}])[0].get("b64_json")
             if b64:
                 import base64
                 return base64.b64decode(b64)
+
+            # Fall back to URL if b64 not available
+            image_url = data.get("data", [{}])[0].get("url")
+            if image_url:
+                import urllib.request as ur
+                req2 = ur.Request(image_url, headers={"User-Agent": "Mozilla/5.0"})
+                with ur.urlopen(req2) as img_resp:
+                    return img_resp.read()
 
             logger.error(f"Unexpected image response format: {data}")
             return None
