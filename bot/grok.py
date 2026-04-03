@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 GROK_API_URL = "https://api.x.ai/v1"
 GROK_TEXT_MODEL = "grok-3"
-GROK_IMAGE_MODEL = "aurora"  # xAI's image generation model
+GROK_IMAGE_MODEL = "grok-2-image"
 
 # 1 in 3 posts get a meme image
 MEME_PROBABILITY = 0.33
@@ -135,7 +135,6 @@ def generate_meme_image(post_text: str) -> bytes | None:
     Generate a dry, Jules-appropriate meme image based on the post text.
     Returns raw image bytes or None if generation fails.
     """
-    # Build an image prompt from Jules' post
     image_prompt_request = (
         f"Jules O'Malley just posted: \"{post_text}\"\n\n"
         "Generate a short image generation prompt (under 100 words) for a dry, deadpan "
