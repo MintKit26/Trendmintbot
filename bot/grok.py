@@ -19,8 +19,8 @@ GROK_API_URL = "https://api.x.ai/v1"
 GROK_TEXT_MODEL = "grok-3"
 GROK_IMAGE_MODEL = "grok-imagine-image"
 
-# Set to 1.0 for testing, change back to 0.33 for production
-MEME_PROBABILITY = 1.0
+# 1 in 3 posts get a meme image
+MEME_PROBABILITY = 0.33
 
 
 def _get_api_key() -> str | None:
